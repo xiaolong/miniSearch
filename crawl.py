@@ -1,28 +1,39 @@
-def record_user_click(index,keyword,url):
-	urls=lookup(index,keyword)
-	if urls:
-		for entry in urls:
-			if entry[0]==url:
-				entry[1]=entry[1]+1
+#def record_user_click(index,keyword,url):
+#	urls=lookup(index,keyword)
+#	if urls:
+#		for entry in urls:
+#			if entry[0]==url:
+#				entry[1]=entry[1]+1
 
 
 #--------------------------------------
+#def add_to_index1(index,keyword,url):###
+#	for item in index:
+#		if keyword==item[0]:
+#			if url not in item[1]: 
+#				item[1].append([url,0])
+#			return
+#	index.append([keyword,[[url,0] ]])
+
 def add_to_index(index,keyword,url):
-	for item in index:
-		if keyword==item[0]:
-			if url not in item[1]: 
-				item[1].append([url,0])
-			return
-	index.append([keyword,[[url,0] ]])
+	if keyword in index:
+		index[keyword].append(url)
+	else:
+		index[keyword]=[url]
+
+#def lookup1(index,keyword):###
+#    for item in index:
+#        if item[0]==keyword: return item[1]
+#    return []
 
 def lookup(index,keyword):
-    for item in index:
-        if item[0]==keyword: return item[1]
-    return []
-
+    if keyword in index:
+        return index[keyword]
+    return None
 
 def add_page_to_index(index,url,content):
-	words=content.split()
+	#words=content.split()
+	words=split_string(content,' !,<>?."')
 	for word in words:
 		add_to_index(index,word,url)
 
@@ -68,7 +79,7 @@ def get_all_links(page):
 		else: break
 	return links
 
-def crawl_web(seed,max_depth):
+def crawl_web1(seed,max_depth): ###
 	tocrawl=[[seed,0]]
 	crawled=[]
 	index=[] # building the search index
@@ -81,5 +92,57 @@ def crawl_web(seed,max_depth):
 				tocrawl.append([link,depth+1])
 			crawled.append(page)
 	return index
+	
+def crawl_web(seed,max_depth): ###
+	tocrawl=[[seed,0]] #<url,depth>
+	crawled=[]
+	index={} # building the search index
+	graph={}
+	while tocrawl:
+		page,depth=tocrawl.pop()
+		if page not in crawled and depth<=max_depth:
+			content=get_page(page)
+			add_page_to_index(index,page,content)
+			outlinks=get_all_links(content)
+			graph[page]=outlinks
+			for link in outlinks:
+				tocrawl.append([link,depth+1])
+			crawled.append(page)
+	return index,graph
 
-print crawl_web('http://web.cecs.pdx.edu/~xcheng',1)[0]
+def compute_ranks(graph):
+	d=0.8 #dumping factor
+	numloops=10
+	ranks={}
+	npages=len(graph)
+	for page in graph:
+		ranks[page]=1.0/npages
+	for i in range(0,numloops):
+		newranks={}
+		for page in graph:
+			newrank=(1-d)/npages
+			for node in graph:
+				if page in graph[node]:
+					newrank=newrank+d*(ranks[node]/len(graph[node]))
+			newranks[page]=newrank
+		ranks=newranks
+	return ranks
+
+def search(index,ranks,keyword):
+	if keyword not in index:
+		return None
+	URLs=index[keyword]
+	bestUrl=URLs[0]
+	bestRank=ranks[bestUrl]
+	for url in URLs:
+		if ranks[url]>bestRank:
+			bestUrl=url
+			bestRank=ranks[url]
+	return bestUrl,bestRank
+
+index,graph= crawl_web('http://web.cecs.pdx.edu/~xcheng',1)
+
+ranks= compute_ranks(graph)
+print ranks
+print search(index,ranks,'Portland')
+
