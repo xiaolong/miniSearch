@@ -1,5 +1,5 @@
 <html>
-<head><title>miniSearch home</title></head>
+<head><title>miniSearch results</title></head>
 
 <body>
 
@@ -8,5 +8,14 @@
 <form action="/search" method="get">
 <input type="text" name="userInput" size='50'/> 
 <input type="submit" value="Go" />
+
+
+<p> You searched: {{word}} </p>
+<p> Here is the results: </p>
+
+{% for i in Qresults %}
+	<p> {{i}} </p>
+{% endfor %}
+
 </body>
 </html>

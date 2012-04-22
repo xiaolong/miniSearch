@@ -1,5 +1,5 @@
 <html>
-<head><title>miniSearch home</title></head>
+<head><title>miniSearch results</title></head>
 
 <body>
 
@@ -8,5 +8,9 @@
 <form action="/search" method="get">
 <input type="text" name="keywords" size='50'/> 
 <input type="submit" value="Go" />
+
+
+<p> You searched: {{}} </p>
+
 </body>
 </html>
