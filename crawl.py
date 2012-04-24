@@ -17,7 +17,8 @@
 
 def add_to_index(index,keyword,url):
 	if keyword in index:
-		index[keyword].append(url)
+		if url not in index[keyword]:##eliminate dups
+			index[keyword].append(url)
 	else:
 		index[keyword]=[url]
 
@@ -33,7 +34,7 @@ def lookup(index,keyword):
 
 def add_page_to_index(index,url,content):
 	#words=content.split()
-	words=split_string(content,' !,<>?."')
+	words=split_string(content,' !,<>?."\"\'')
 	for word in words:
 		add_to_index(index,word,url)
 
@@ -139,10 +140,31 @@ def search(index,ranks,keyword):
 			bestUrl=url
 			bestRank=ranks[url]
 	return bestUrl,bestRank
+	
+	
+def storeToDB(index, ranks):#store data to DB
+	import MySQLdb
+	db=MySQLdb.connect(user='root',db='mini', passwd='cxl', host='localhost')
+	cursor=db.cursor()
+	for keyword in index:
+		for url in index[keyword]:
+			try:
+				cursor.execute('insert into mini_index values("'+keyword+'", "'+url+'")' )
+			except:
+				continue
+	
+	for url in ranks:
+		try:
+			cursor.execute('insert into mini_ranks values("'+url+'", '+str(ranks[url])+')' )
+		except: 
+			continue
+	db.close()
 
-index,graph= crawl_web('http://web.cecs.pdx.edu/~xcheng',1)
+
+index,graph= crawl_web('http://web.cecs.pdx.edu/~xcheng',2)
 
 ranks= compute_ranks(graph)
-print ranks
-print search(index,ranks,'Portland')
+#print ranks
+#print search(index,ranks,'Portland')
+storeToDB(index,ranks)
 
