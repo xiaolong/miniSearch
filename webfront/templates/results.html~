@@ -6,15 +6,19 @@
 <h1>miniSearch</h1>
 
 <form action="/search" method="get">
-<input type="text" name="userInput" size='50'/> 
+<input type="text" name="userInput" size='50' value="{{bounce_key}}" /> 
 <input type="submit" value="Go" />
 
 
-<p> You searched: {{word}} </p>
+<p> You searched: {{bounce_key}} </p>
 <p> Here is the results: </p>
 
-{% for i in urls %}
-	<p> {{i}} </p>
+{% for i in Qresults %}
+	<div> 
+		<p> <a href="{{i.url}}" >{{i.title}} </a> <br/>
+		<font size="2" color="green"> {{i}}</font> <br/>
+		</p>
+	</div>
 {% endfor %}
 
 </body>

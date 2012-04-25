@@ -24,5 +24,6 @@ class ResultUrls(models.Model):
 			urls.append({'url':row[0], 'title':row[1]})
 		db.close()
 		self.urls=urls
+		#self.titles=titles
 		
 	

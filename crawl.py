@@ -140,7 +140,17 @@ def search(index,ranks,keyword):
 			bestUrl=url
 			bestRank=ranks[url]
 	return bestUrl,bestRank
-	
+
+#-------------------------------------
+def getText(url):
+	page=get_page(url)
+	start_title=page.find('<title>')
+	if start_title==-1: 
+		return "(Empty)"
+	end_title=page.find('</title>')
+	title=page[start_title+7:end_title]
+	return title	
+		
 	
 def storeToDB(index, ranks):#store data to DB
 	import MySQLdb
@@ -155,16 +165,21 @@ def storeToDB(index, ranks):#store data to DB
 	
 	for url in ranks:
 		try:
-			cursor.execute('insert into mini_ranks values("'+url+'", '+str(ranks[url])+')' )
+			title=getText(url)
+			cursor.execute('insert into mini_ranks (url,rank,title) values("'+url+'", '+str(ranks[url])+',"'+str(title)+'")' )
+			#cursor.execute('insert into mini_ranks (url,rank) values("'+url+'", '+str(ranks[url])+')' )
 		except: 
 			continue
 	db.close()
+	
 
 
-index,graph= crawl_web('http://web.cecs.pdx.edu/~xcheng',2)
+index,graph= crawl_web('http://sparkloftmedia.com/',2)
 
 ranks= compute_ranks(graph)
-#print ranks
-#print search(index,ranks,'Portland')
+##print ranks
+##print search(index,ranks,'Portland')
 storeToDB(index,ranks)
+
+
 
